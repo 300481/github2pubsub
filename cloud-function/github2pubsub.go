@@ -19,17 +19,11 @@ type pubSubMessage struct {
 
 // NewGCP creates new GCP PubSub struct
 func newGCP() *mq.GCP {
-	log.Println("Create GCP PubSub message queue config.")
 	return &mq.GCP{
 		TopicName:   os.Getenv("GCP_TOPIC_NAME"),
 		CreateTopic: os.Getenv("GCP_CREATE_TOPIC") == "TRUE",
 		ProjectID:   os.Getenv("GCP_PROJECT_ID"),
 	}
-}
-
-func (p *pubSubMessage) ToJson() (b []byte, err error) {
-	b, err = json.Marshal(p)
-	return b, err
 }
 
 // Send sends a notification of Github Webhook to the topic
