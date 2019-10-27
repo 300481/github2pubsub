@@ -16,12 +16,14 @@ For more information about possible events see the [sourcecode](https://github.c
 
 ## Installation
 
-* `git clone https://github.com/300481/github2pubsub.git`
-* `cd deployments`
-* ```bash
+```bash
+git clone https://github.com/300481/github2pubsub.git
 export GCP_TOPIC_NAME=yourtopicname
 export GCP_CREATE_TOPIC=TRUE
 export GCP_PROJECT_ID=yourprojectid
 export GITHUB_SECRET=yourgithubsecret
 export GITHUB_EVENTS=ping/yourwantedevents
+cd deployments
+chmod +x gcloud.sh
+./gcloud.sh
 ```
