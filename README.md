@@ -14,6 +14,12 @@ Environment Variable     |Description                                 |Valid val
 
 For more information about possible events see the [sourcecode](https://github.com/go-playground/webhooks/blob/v5/github/github.go#L30).
 
+## Prerequisites
+
+* account for Google Cloud Platform
+* Git
+* Docker
+
 ## Installation
 
 ```bash
