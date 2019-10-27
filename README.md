@@ -16,7 +16,7 @@ For more information about possible events see the [sourcecode](https://github.c
 
 ## Prerequisites
 
-* account for Google Cloud Platform
+* account for [Google Cloud Platform](https://cloud.google.com/)
 * Git
 * Docker
 
