@@ -12,12 +12,13 @@ import (
 	"gopkg.in/go-playground/webhooks.v5/github"
 )
 
+// pubSubMessage contains the type of webhook and its payload
 type pubSubMessage struct {
 	GithubEventType github.Event
 	GithubEvent     interface{}
 }
 
-// NewGCP creates new GCP PubSub struct
+// newGCP creates new GCP PubSub publisher struct
 func newGCP() *mq.GCP {
 	return &mq.GCP{
 		TopicName:   os.Getenv("GCP_TOPIC_NAME"),
@@ -52,6 +53,7 @@ func Send(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// create the GCP PubSub message
 	eventType := r.Header.Get("X-GitHub-Event")
 
 	message, err := json.Marshal(&pubSubMessage{
@@ -63,7 +65,7 @@ func Send(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// publish the notification event to GCP PubSub
+	// publish the message to GCP PubSub
 	id, err := newGCP().Publish(message)
 	if err != nil {
 		handleError(err, w)
@@ -77,6 +79,7 @@ func Send(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "{}")
 }
 
+// error handling function
 func handleError(err error, w http.ResponseWriter) {
 	w.WriteHeader(http.StatusInternalServerError)
 	w.Write([]byte(err.Error()))
