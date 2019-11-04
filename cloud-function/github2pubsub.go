@@ -1,8 +1,10 @@
 package github2pubsub
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -14,8 +16,9 @@ import (
 
 // pubSubMessage contains the type of webhook and its payload
 type pubSubMessage struct {
-	GithubEventType github.Event
-	GithubEvent     interface{}
+	Method string
+	Header http.Header
+	Body   []byte
 }
 
 // newGCP creates new GCP PubSub publisher struct
@@ -25,6 +28,20 @@ func newGCP() *mq.GCP {
 		CreateTopic: os.Getenv("GCP_CREATE_TOPIC") == "TRUE",
 		ProjectID:   os.Getenv("GCP_PROJECT_ID"),
 	}
+}
+
+// cloneHeader copies the request Header into a new string map
+func cloneHeader(header http.Header) http.Header {
+	var b bytes.Buffer
+
+	r, err := http.NewRequest("POST", "http://example.com", &b)
+	if err != nil {
+		log.Println("error while cloning Header")
+		return nil
+	}
+
+	r.Header = header
+	return r.Header
 }
 
 // Send sends a notification of Github Webhook to the topic
@@ -47,18 +64,22 @@ func Send(w http.ResponseWriter, r *http.Request) {
 	for i := range events {
 		gitHubEvents[i] = github.Event(events[i])
 	}
-	payload, err := hook.Parse(r, gitHubEvents...)
+	_, err = hook.Parse(r, gitHubEvents...)
 	if err != nil {
 		handleError(err, w)
 		return
 	}
 
-	// create the GCP PubSub message
-	eventType := r.Header.Get("X-GitHub-Event")
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		handleError(err, w)
+		return
+	}
 
 	message, err := json.Marshal(&pubSubMessage{
-		GithubEventType: github.Event(eventType),
-		GithubEvent:     payload,
+		Method: r.Method,
+		Header: cloneHeader(r.Header),
+		Body:   body,
 	})
 	if err != nil {
 		handleError(err, w)
