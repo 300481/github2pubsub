@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -64,18 +63,17 @@ func Send(w http.ResponseWriter, r *http.Request) {
 	for i := range events {
 		gitHubEvents[i] = github.Event(events[i])
 	}
-	_, err = hook.Parse(r, gitHubEvents...)
+	payload, err := hook.Parse(r, gitHubEvents...)
 	if err != nil {
 		handleError(err, w)
 		return
 	}
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := json.Marshal(payload)
 	if err != nil {
 		handleError(err, w)
 		return
 	}
-
 	message, err := json.Marshal(&pubSubMessage{
 		Method: r.Method,
 		Header: cloneHeader(r.Header),
